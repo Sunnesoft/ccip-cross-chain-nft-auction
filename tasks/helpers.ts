@@ -15,5 +15,5 @@ export const getCcipMessageId = async (tx: ContractTransactionResponse, receipt:
     // Simulate a contract call with the transaction data at the block before the transaction
     const messageId = await provider.call(call);
 
-    console.log(`✅ You can now monitor the token transfer status via CCIP Explorer by searching for CCIP Message ID: ${messageId}`);
+    console.log(`You can now monitor the token transfer status via CCIP Explorer by searching for CCIP Message ID: ${messageId}`);
 }

@@ -3,7 +3,10 @@ dotenvenc.config();
 
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import './tasks'
+import '@typechain/hardhat'
+import '@nomicfoundation/hardhat-ethers'
+import '@nomicfoundation/hardhat-chai-matchers'
+import "./tasks"
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHEREUM_SEPOLIA_RPC_URL = process.env.ETHEREUM_SEPOLIA_RPC_URL;
@@ -12,8 +15,17 @@ const OPTIMISM_GOERLI_RPC_URL = process.env.OPTIMISM_GOERLI_RPC_URL;
 const ARBITRUM_TESTNET_RPC_URL = process.env.ARBITRUM_TESTNET_RPC_URL;
 const AVALANCHE_FUJI_RPC_URL = process.env.AVALANCHE_FUJI_RPC_URL;
 
+
 const config: HardhatUserConfig = {
-  solidity: "0.8.19",
+  solidity: {
+    version: "0.8.19",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
   networks: {
     hardhat: {
       chainId: 31337

@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as utils from "./utils";
 export type { utils };
-export type { DestinationMinter } from "./DestinationMinter";
-export type { MyNFT } from "./MyNFT";
-export type { SourceMinter } from "./SourceMinter";
+export type { ChainRegistry } from "./ChainRegistry";
+export type { CrossChainNFT } from "./CrossChainNFT";
+export type { CrossChainSender } from "./CrossChainSender";
+export type { CrossChainVickreyAuction } from "./CrossChainVickreyAuction";
+export type { ICrossChainVickreyAuctionErrors } from "./ICrossChainVickreyAuctionErrors";

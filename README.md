@@ -1,256 +1,442 @@
-# CCIP Cross Chain NFT
 
-> **Note**
->
-> _This repository represents an example of using a Chainlink product or service. It is provided to help you understand how to interact with Chainlinkâ€™s systems so that you can integrate them into your own. This template is provided "AS IS" without warranties of any kind, has not been audited, and may be missing key checks or error handling to make the usage of the product more clear. Take everything in this repository as an example and not something to be copy pasted into a production ready service._
+![](https://lh7-us.googleusercontent.com/cPS48Hv81986EfOb0ui6VmnM0HaFArao8c5MsBo-ZWeVFVb9UKIkYDYVLQgST3QOqwi6aOifxaZnr1ivlDpRuGPNBw7KoStPNwsquTaE4ssGbnp1kaRi3_gg29kF1KOmSdAaaA-MCtH07oZFK3Z-1LI)
 
-This project demonstrates how to mint an NFT on one blockchain from another blockchain using Chainlink CCIP.
+**+xchange** or **CrossExchange** is the EVM crosschain auction protocol based on Chainlink [CCIP](https://docs.chain.link/ccip). This protocol was made as a project of "Constellation" Chainlink Hackathon (NOV 8 – DEC 10 2023). 
+
+Inspired by [The Auction Zoo](https://github.com/a16z/auction-zoo/tree/main), the announcement of [UniswapX](https://blog.uniswap.org/uniswapx-protocol) and opportunities of Chainlink CCIP this protocol called upon to solve the problems of connectivity of seller's offers and needs of buyers of NFTs tokens. Currently, most NFTs are single-chain solutions and when the owner decides to swap it for another asset he can only do it within one chain (let's call it the source chain). It greatly narrows the market and creates additional risks for buyers. If the buyer hasn't got a token asset in the source chain but has this in another one (let's call it the destination chain) then he should use either a bridge (like CCIP, Polygon (POS) Bridge, Plasma, etc) or cryptocurrency exchange providers (like Binance, Kraken, etc). Anyway, he pays the platform extra commission, or should wait for some time while his assets are delivered to the source chain. During the waiting time, his asset is locked and in some cases, the seller may not wait and sell this NFT token to buyers who are ready to pay for it right now.    
+
+## Solution
+
+**+xchange** provides the sealed-bid second-price auction (Vickrey auction) Smart contract which is deployed to source and destination chains and can send and receive messages and tokens (ERC721 and ERC20) by the Chainlink CCIP protocol. The same auction contract is deployed in every EVM-compatible chain and provides the following functionality:
+- Seller creates an auction in the chain where NFT (ERC721) token exists (source chain).
+- Seller creates an auction in the chain where buyers who desire to buy this token (destination chain).
+- Seller defines the minimum value of bid and collateral is the same for all bidders.
+- Bidders submit written bids without knowing the bids of the other people in the auction.
+- In every chain, the local winner is announced after bidders reveal the bid values.
+- The results of the auction in every destination chain are replied to source chain auction for the definition of a global winner.
+- The highest bidder from all chains wins but the price paid is the second-highest bid of all bids from all chains.    
+- The global winner receives NFT tokens in his chain (destination chain) and sends payment (ERC20 cross-chain tokens) to seller chain (source chain).
+- When the winner decide to sell this NFT token he also may create auction in his chain with the same functionallity and find the buyers from other chains.  
+
+The core of the **+xchange** is CrossChainVickreyAuction.sol Solidity smart contract (all contracts you can find in ./contracts). For minting NFT on destination chain also CrossChainNFT.sol contract must be deployed in destination chain and the ownership must be transferred to corresponding contract. 
+
+![](https://lh7-us.googleusercontent.com/o6o9hFCIp6ETLXDe8QWxeVZYmf5br9ZT8Bjc__H8DGgPzop8LJSct6IjncbqgOoBYpaPQEQFeOpkHjnrgYo3tt3kgeUU0MvVa7fIiqIX2zYGtIy4Qa_JjWPK5CkApmlBB9FbTo8SzWghD83x62DwFZQ)
+
+The original contract is the contract inherited from IERC721URIStorage. The replica one is the CrossChainNFT contract also inherited from IERC721URIStorage and implemets mint() method.
+
+## Timeline
+
+![](https://lh7-us.googleusercontent.com/t2MrY8_Nv-91WThhGe62f8Mtw-n-KFydh7uMn5EIBTYCmj9FFHdcuUNneij8oV7ttw2Wmv7LkCx8ZRVTUG3lE8GOmvNRy1lSL7qvcaNPKTLA4vgvxB_hA5CkY3h8tckT-LyXwF8NVp_8UAJ9KK_a6po)
+
+
+Current solution has some features:
+
+- At start phase bidder pays only collateral value so nobody knows how much he really want to pay for the NFT token. But the collateral value must be enough to exclude inadequate hype and make seller confident that bidder intents to buy this token.
+- All crosschain fees will be paid by msg.sender in native token.
+- Although the protocol provides freedom of action for all interested parties, at each stage there are strict requirements for honest effort.
+- Any tokens send btwn chains only at final step of auction.
+
+So now you are quite immersed in the topic let's begin...
 
 ## Prerequisites
 
-- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- [Current LTS Node.js version](https://nodejs.org/en/about/releases/)
-
-Verify installation by typing:
-
-```shell
-node -v
-```
-
-and
-
-```shell
-npm -v
-```
-
+-   [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+-   [Current LTS Node.js version](https://nodejs.org/en/about/releases/)
+-   [Hardhat](https://hardhat.org/hardhat-runner/docs/getting-started#installation)
+    
 ## Getting Started
 
-1. Install packages
+1.  Install packages
 
-```
-npm install
-```
+    ```shell
+    npm install
+    ```
 
-2. Compile contracts
+3.  Compile contracts
+    
+    ```shell
+    npx hardhat compile
+    ```
 
-```
-npx hardhat compile
-```
+4.  Set up some environment variables.
+    
+- Set a password for encrypting and decrypting the environment variable file. You can change it later by typing the same command.
+   
+    ```shell
+    npx env-enc set-pw
+    ```
 
-## What is Chainlink CCIP?
+ - Now set the following environment variables: PRIVATE_KEY, Source Blockchain RPC URL, Destination Blockchain RPC URL. You can see available options in the .env.example file:
 
-**Chainlink Cross-Chain Interoperability Protocol (CCIP)** provides a single, simple, and elegant interface through which dApps and web3 entrepreneurs can securely meet all their cross-chain needs, including token transfers and arbitrary messaging.
+    ```shell
+    PRIVATE_KEY=""
+    ETHEREUM_SEPOLIA_RPC_URL=""
+    OPTIMISM_GOERLI_RPC_URL=""
+    ARBITRUM_TESTNET_RPC_URL=""
+    AVALANCHE_FUJI_RPC_URL=""
+    POLYGON_MUMBAI_RPC_URL=""
+    ```
 
-![basic-architecture](./img/basic-architecture.png)
+    To set these variables, type the following command and follow the instructions in the terminal:
 
-With Chainlink CCIP, one can:
+    ```shell
+    npx env-enc set
+    ```
 
-- Transfer supported tokens
-- Send messages (any data)
-- Send messages and tokens
+    After you are done, the .env.enc file will be automatically generated.
 
-CCIP receiver can be:
+    If you want to validate your inputs you can always run the next command:
 
-- Smart contract that implements `CCIPReceiver.sol`
-- EOA
+    ```shell
+    npx env-enc view
+    ```
 
-**Note**: If you send a message and token(s) to EOA, only tokens will arrive
+4.  Run tests
 
-To use this project, you can consider CCIP as a "black-box" component and be aware of the Router contract only. If you want to dive deep into it, check the [Official Chainlink Documentation](https://docs.chain.link/ccip).
+    ```shell
+    npx hardhat test
+    ```
 
-## What are we building?
+5.  Receive test tokens using any public faucet on the address which you are linked with your private key defined in 4 point. After balance is updated you may use project faucet for sending tokens to seller and buyers accounts:
+    
+    ```shell
+    npx hardhat faucet 
+        --blockchain NETWORK_ALIAS 
+        --recipient RECIPIENT_ADDRESS 
+        --amount AMOUNT  
+        --token-contract TEST_TOKEN_ADDRESS # Optional
+    ```
+    where 
+    
+    - NETWORK_ALIAS must be one of [ethereumSepolia, polygonMumbai, optimismGoerli, arbitrumTestnet, avalancheFuji],
+    - AMOUNT may be 1000000000000000 which is equal 0.001 ETH for empty --token-contract option and NETWORK_ALIAS == ethereumSepolia,
+    - ADDRESS is a public address of the recipient,
+    - TEST_TOKEN_ADDRESS is optional and may be any cross chain token ERC20 contract address.
+  
+6. Deploy the auction and nft contracts in the desired chains. The same contract will deploy to every network NETWORK_ALIAS. ROUTER_ADDRESS_IN_NETWORK will be taken from config or if defined explicitly then from command line arg.   
+   
+    ```shell
+    npx hardhat deploy-auction 
+        --router ROUTER_ADDRESS_IN_NETWORK #optional
+        --network NETWORK_ALIAS 
+        --token-address TOKEN_ADDRESS
+        --gas-limit GAS_LIMIT 
+        --strict STRICT_MODE 
+        --source-chain-name SOURCE_NETWORK_ALIAS 
+        --nft-name "Custom Nft (POS)" # Optional if nft contract already deployed
+        --nft-symbol "CNFT" # Optional if nft contract already deployed
+        --nft-token-contract NFT_TOKEN_CONTRACT_ADDRESS # Required if nft contract already deployed
+    ```
+    where 
 
-Imagine that you want to go to a conference that sells tickets as NFTs on one chain, but you have funds on some other chain. You will need to bridge your tokens to that chain where the NFT contract exists, to mint the NFT, and optionally bridge funds back.
+    - TOKEN_ADDRESS is address of deployed cross chain ERC20 token, e.g. LINK token contract in polygonMumbai chain is 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+    - GAS_LIMIT is gas limit for crosschain message processing,
+    - STRICT_MODE must be true or false [more here](https://docs.chain.link/ccip/best-practices),
+    - SOURCE_NETWORK_ALIAS must be one of [ethereumSepolia, polygonMumbai, optimismGoerli, arbitrumTestnet, avalancheFuji] and if SOURCE_NETWORK_ALIAS != NETWORK_ALIAS then nft token ownership will be transfered to auction contract,
+    
+7. Mint test nft tokens  
+        
+    ```shell
+    npx hardhat mint-nft-source 
+        --source-blockchain NETWORK_ALIAS 
+        --nft-token-contract NFT_TOKEN_CONTRACT_ADDRESS 
+        --token-id ID 
+        --token-uri URI
+        --address RECIPIENT_ADDRESS
+    
+    ```
 
-We are building the cross-chain NFT minting system. This project aims to mint an NFT on the destination blockchain by sending the `to` address from the source blockchain. It is extremely simple so we can understand the basic concepts, but you can expand it to accept payment for minting on the source blockchain, add extra features, etc.
+    where 
 
-The basic architecture diagram of what we want to accomplish looks like this:
+    - ID - tokenId value, number
+    - URI - tokenUri value, string
+    - RECIPIENT_ADDRESS - hex address of recipient account.
 
-```mermaid
-flowchart LR
-subgraph "Source Blockchain"
-a("SourceMinter.sol") -- "`send abi.encodeWithSignature('mint(address)', msg.sender);`" --> b("Source Router")
-end
-
-b("Source Router") --> c("CCIP")
-
-c("CCIP") --> d("Destination Router")
-
-subgraph "Destination Blockchain"
-d("Destination Router") -- "`receive abi.encodeWithSignature('mint(address)', msg.sender);`" --> e("DestinationMinter.sol")
-e("DestinationMinter.sol") -- "`call mint(to)`" --> f("MyNFT.sol")
-end
-```
+Perfect! Now you are ready for create your first auction.
 
 ## Usage
 
-There are several Hardhat tasks available for deployment and interaction with this project. But before that, you need to set up some environment variables.
+### Available tasks:
 
-We are going to use the [`@chainlink/env-enc`](https://www.npmjs.com/package/@chainlink/env-enc) package for extra security. It encrypts sensitive data instead of storing them as plain text in the `.env` file, by creating a new, `.env.enc` file. Although it's not recommended to push this file online, if that accidentally happens your secrets will still be encrypted.
+  - **balance-of-nft**                Gets the balance of CrossChainNFT for provided address
+  - **bid**                           Set bid to CrossChainVickreyAuction.sol
+  - **create-auction-destination**    Creates the new CrossChainVickreyAuction in destination network
+  - **create-auction-source**         Creates the new CrossChainVickreyAuction in source network
+  - **deploy-auction**                Deploys CrossChainNFT.sol and CrossChainVickreyAuction.sol smart contracts
+  - **faucet**                        Transfers the provided amount of ERC20 token or native coin to the recipient
+  - **finish**                        Finish the auction of CrossChainVickreyAuction.sol       
+  - **get-approved-for-nft**              Gets approved address of CrossChainNFT
+  - **get-auction-info**              Get CrossChainVickreyAuction information
+  - **mint-nft-source**               Mint nft of CrossChainNFT.sol in source chain
+  - **owner-of-nft**                  Gets the owner of CrossChainNFT for provided tokenId
+  - **push-highest-bid-to**           Send auction highest bid to destination chain
+  - **push-highest-bid-to-source**    Send auction highest bid to source chain
+  - **reveal**                        Reveal the bid of CrossChainVickreyAuction.sol
+  - **set-allowed-chain**             Add allowed chain to CrossChainVickreyAuction
+  - **withdraw-collateral**           Withdraws collateral (in ERC20 tokens) from CrossChainVickreyAuction.sol
 
-1. Set a password for encrypting and decrypting the environment variable file. You can change it later by typing the same command.
-
-```shell
-npx env-enc set-pw
-```
-
-2. Now set the following environment variables: `PRIVATE_KEY`, Source Blockchain RPC URL, Destination Blockchain RPC URL. You can see available options in the `.env.example` file:
-
-```shell
-ETHEREUM_SEPOLIA_RPC_URL=""
-OPTIMISM_GOERLI_RPC_URL=""
-ARBITRUM_TESTNET_RPC_URL=""
-AVALANCHE_FUJI_RPC_URL=""
-POLYGON_MUMBAI_RPC_URL=""
-```
-
-To set these variables, type the following command and follow the instructions in the terminal:
-
-```shell
-npx env-enc set
-```
-
-After you are done, the `.env.enc` file will be automatically generated.
-
-If you want to validate your inputs you can always run the next command:
+For getting the full list of tasks you should type
 
 ```shell
-npx env-enc view
+npx hardhat help
 ```
 
-### Deployment
+### Usecases
 
-1. Deploy the [`MyNFT.sol`](./contracts/cross-chain-nft-minter/MyNFT.sol) and [`DestinationMinter.sol`](./contracts/cross-chain-nft-minter/DestinationMinter.sol) smart contracts to the **destination blockchain**, by running the `deploy-destination-minter` task:
+There is detailed example of crosschain auction workflow (ethereumSepolia, polygonMumbai).
+
+Nft contract address in source chain is 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654. If you want to reproduce the whole workflow then follow instructions above. ERC20 token using for payment is LINK.
+
+#### Deployment
+
+- Let's deploy auction contract to ethereumSepolia network:
 
 ```shell
-npx hardhat deploy-destination-minter
---router <routerAddress> # Optional
+npx hardhat deploy-auction --network ethereumSepolia --token-address 0x779877A7B0D9E8603169DdbD7836e478b4624789 --gas-limit 500000 --strict true --source-chain-name ethereumSepolia --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654
 ```
 
-For example, if you want to mint NFTs on avalancheFuji, run:
+Example of output:
+
+```
+Attempting to deploy CrossChainVickreyAuction smart contract on the ethereumSepolia blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address, with the Router address 0xd0daae2231e9cb96b94c8512223533293c3693bf provided as constructor argument
+CrossChainVickreyAuction contract deployed at address 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 on the ethereumSepolia blockchain
+```
+
+- Let's deploy auction and nft contracs to polygonMumbai:
 
 ```shell
-npx hardhat deploy-destination-minter --network avalancheFuji
+npx hardhat deploy-auction --network polygonMumbai --token-address 0x326C977E6efc84E512bB9C30f76E30c160eD06FB --gas-limit 500000 --strict true --source-chain-name ethereumSepolia --nft-name "Custom Nft (POS)" --nft-symbol "CNFT"
 ```
 
-2. Deploy the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract to the **source blockchain**, by running the `deploy-source-minter` task:
+Example of output:
+
+```
+Attempting to deploy CrossChainVickreyAuction smart contract on the polygonMumbai blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address, with the Router address 0x70499c328e1e2a3c41108bd3730f6670a44595d1 provided as constructor argument
+CrossChainVickreyAuction contract deployed at address 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f on the polygonMumbai blockchain
+Attempting to deploy CrossChainNFT smart contract on the polygonMumbai blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address
+CrossChainNFT contract deployed at address 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 on the polygonMumbai blockchain
+Attempting to grant the minter role to the CrossChainVickreyAuction smart contract
+CrossChainVickreyAuction can now mint CrossChainNFTs. Transaction hash: 0x461b56f6d6c7b8c721b2479a8290ca7c7125f3292ea6c723630827819deef020
+```
+
+- We need to set permissions list of allowed chains for every auction contracts:
+
 
 ```shell
-npx hardhat deploy-source-minter
---router <routerAddress> # Optional
---link <linkTokenAddress> # Optional
+npx hardhat set-allowed-chain --source-blockchain polygonMumbai --destination-blockchain ethereumSepolia --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --receiver 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8
+
+npx hardhat set-allowed-chain --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --receiver 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f
 ```
 
-For example, if you want to mint NFTs on avalancheFuji by sending requests from ethereumSepolia, run:
+#### Auction creation
+
+- Seller address is 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a. Lets mint new NFT token for him: 
 
 ```shell
-npx hardhat deploy-source-minter --network ethereumSepolia
+npx hardhat mint-nft-source --source-blockchain ethereumSepolia --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --token-uri https://example.com/4 --address 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a
 ```
 
-### Fee Management
+Tx hash: [0xe00c6c3b995dc252ecc5a858818fb03a9cb4cb1b876d80aa736f20357d748151](https://sepolia.etherscan.io/tx/0xe00c6c3b995dc252ecc5a858818fb03a9cb4cb1b876d80aa736f20357d748151)
 
-3. Fund the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract with tokens for CCIP fees.
 
-- If you want to pay for CCIP fees in Native tokens:
-
-  Open Metamask and fund your contract with Native tokens. For example, if you want to mint from Ethereum Sepolia to Avalanche Fuji, you can send 0.01 Sepolia ETH to the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract.
-
-  Or, you can execute the `fill-sender` task, by running:
+- Now we are ready to create auction in the source chain:
 
 ```shell
-npx hardhat fill-sender
---sender-address <sourceMinterAddress>
---blockchain <blockchain>
---amount <amountToSend>
---pay-fees-in <Native>
+npx hardhat create-auction-source --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --start-time 0 --bid-period 600 --reveal-period 600 --reply-period 600 --collateral 1 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e
 ```
 
-For example, if you want to fund it with 0.01 Sepolia ETH, run:
+Tx hash: 0xc1fb42e9a3874cfd5cb50b4f6b83c8b40b21dc01db5cf5c528ef7976f3470bcd(https://sepolia.etherscan.io/tx/0xc1fb42e9a3874cfd5cb50b4f6b83c8b40b21dc01db5cf5c528ef7976f3470bcd)
+
+
+- Let's create the aucion on polygonMumbai network:
 
 ```shell
-npx hardhat fill-sender --sender-address <SOURCE_MINTER_ADDRESS> --blockchain ethereumSepolia --amount 10000000000000000 --pay-fees-in Native
+npx hardhat create-auction-destination --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --source-nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --destination-nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
 ```
 
-- If you want to pay for CCIP fees in LINK tokens:
+Tx hash: [0x37c054ef9234d2f3a8d77190f1e30dcf22539d83f1ce353cf178454b286fce10](https://sepolia.etherscan.io/tx/0x37c054ef9234d2f3a8d77190f1e30dcf22539d83f1ce353cf178454b286fce10)
 
-  Open Metamask and fund your contract with LINK tokens. For example, if you want to mint from Ethereum Sepolia to Avalanche Fuji, you can send 0.001 Sepolia LINK to the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract.
+CCIP Message ID: [0x2892cbc2a5d3cbaa04bb955f6f1c9cc09e83966eb80857d1cf35327194936218](https://ccip.chain.link/msg/0x2892cbc2a5d3cbaa04bb955f6f1c9cc09e83966eb80857d1cf35327194936218)
 
-  Or, you can execute the `fill-sender` task, by running:
+
+- Let's get information about auction from ethereumSepolia chain:
 
 ```shell
-npx hardhat fill-sender
---sender-address <sourceMinterAddress>
---blockchain <blockchain>
---amount <amountToSend>
---pay-fees-in <LINK>
+npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14
 ```
 
-For example, if you want to fund it with 0.001 Sepolia LINK, run:
+Example of output:
+
+```
+Attempting to call the getAuctionInfo function of the CrossChainVickreyAuction.sol smart contract on the ethereumSepolia from 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 account
+getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702264908,1702265508,1702266108,1702266708,0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654,1,0,0,0x0000000000000000000000000000000000000000,0
+```
+
+- Let's get information about auction from polygonMumbai chain:
 
 ```shell
-npx hardhat fill-sender --sender-address <SOURCE_MINTER_ADDRESS> --blockchain ethereumSepolia --amount 1000000000000000 --pay-fees-in LINK
+npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14
 ```
 
-### Minting
+Example of output:
 
-4. Mint NFTs by calling the `mint()` function of the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract on the **source blockchain**. It will send the CCIP Cross-Chain Message with the ABI-encoded mint function signature from the [`MyNFT.sol`](./contracts/cross-chain-nft-minter/MyNFT.sol) smart contract. The [`DestinationMinter.sol`](./contracts/cross-chain-nft-minter/DestinationMinter.sol) smart contracts will receive the CCIP Cross-Chain Message with the ABI-encoded mint function signature as a payload and call the [`MyNFT.sol`](./contracts/cross-chain-nft-minter/MyNFT.sol) smart contract using it. The [`MyNFT.sol`](./contracts/cross-chain-nft-minter/MyNFT.sol) smart contract will then mint the new NFT to the `msg.sender` account from the `mint()` function of the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract, a.k.a to the account from which you will call the following command:
+```
+Attempting to call the getAuctionInfo function of the CrossChainVickreyAuction.sol smart contract on the polygonMumbai from 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 account
+getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702257840,1702259040,1702260240,1702261440,0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2,1,0,0,0x0000000000000000000000000000000000000000,0
+```
+
+#### Bidding
+
+- First bidder (0x2A0CC2B5286Ebe0ff276B5593d6471f254325063) will make bid to polygonMumbai. Lets increase LINK and MATIC balances for this account.
 
 ```shell
-npx hardhat cross-chain-mint
---source-minter <sourceMinterAddress>
---source-blockchain <sourceBlockchain>
---destination-blockchain <destinationBlockchain>
---destination-minter <destinationMinterAddress>
---pay-fees-in <Native | LINK>
+npx hardhat faucet --blockchain polygonMumbai --recipient 0x2A0CC2B5286Ebe0ff276B5593d6471f254325063 --amount 1000000000000000
+
+npx hardhat faucet --blockchain polygonMumbai --recipient 0x2A0CC2B5286Ebe0ff276B5593d6471f254325063 --amount 10000000000000000000 --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 ```
 
-For example, if you want to mint NFTs on Avalanche Fuji by sending requests from Ethereum Sepolia, run:
+Tx hash: [0x2b084d114b7d37fe2801a559581cdc528571bd0e777e4047ad069b339dd36951](https://mumbai.polygonscan.com/tx/0x2b084d114b7d37fe2801a559581cdc528571bd0e777e4047ad069b339dd36951)
+
+Tx hash: [0xe37c0caf69337f564c88e3faeec4e6f829a5cff90a599b7c9ae522b4fd225a1b](https://mumbai.polygonscan.com/tx/0xe37c0caf69337f564c88e3faeec4e6f829a5cff90a599b7c9ae522b4fd225a1b)
+
+- Do the same for bidders 0x6d8d2E18c03364516abDE76915A5453A26fe8D53 in polygonMumbai and for 0xc825b4b6C22428De58a88f3E032C193a77D35071, 0x922eA37Ed75e180006424755C21Aa2a3FDFd4bEA in ethereumSepolia networks.
+
+For 0x6d8d2E18c03364516abDE76915A5453A26fe8D53:
+
+Tx hash: [0x2c85d9e3c67c30893a2b07c4be0535d7f52ba76224eadc9acc2c79be2a60c629](https://mumbai.polygonscan.com/tx/0x2c85d9e3c67c30893a2b07c4be0535d7f52ba76224eadc9acc2c79be2a60c629)
+
+Tx hash: [0x8855687b57891e48c1207d10731880690b1316186aaddec75b5462f0d092dba0](https://mumbai.polygonscan.com/tx/0x8855687b57891e48c1207d10731880690b1316186aaddec75b5462f0d092dba0)
+
+For 0xc825b4b6C22428De58a88f3E032C193a77D35071:
+
+Tx hash: [0x4b7e6ed07adce5d6568c4d6c60f523736f198c605b8a7a42e75397809d9bc266](https://sepolia.etherscan.io/tx/0x4b7e6ed07adce5d6568c4d6c60f523736f198c605b8a7a42e75397809d9bc266)
+
+Tx hash: [0x25c5f0e617027cd2893d5730936fca411bbc2958c8c3ad6d585246d4173eb14f](https://sepolia.etherscan.io/tx/0x25c5f0e617027cd2893d5730936fca411bbc2958c8c3ad6d585246d4173eb14f)
+
+For 0x922eA37Ed75e180006424755C21Aa2a3FDFd4bEA:
+
+Tx hash: [0x1044642a646cb77cefb247cdd2e84fc1b8dcc5add9e1af602fb2fec860699eb8](https://sepolia.etherscan.io/tx/0x1044642a646cb77cefb247cdd2e84fc1b8dcc5add9e1af602fb2fec860699eb8)
+
+Tx hash: [0xd12ad978a1e6888236ae1e03876f844f3595232a897e075e5c75968ba270b225](https://sepolia.etherscan.io/tx/0xd12ad978a1e6888236ae1e03876f844f3595232a897e075e5c75968ba270b225)
+
+
+- Let's make the first bids
 
 ```shell
-npx hardhat cross-chain-mint --source-minter <SOURCE_MINTER_ADDRESS> --source-blockchain ethereumSepolia --destination-blockchain avalancheFuji --destination-minter <DESTNATION_MINTER_ADDRESS> --pay-fees-in Native
+npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+
+npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk 341b403ddd84bd3ebc46d0ef9c4b0a89158bcbdb77a578a4cb0c0831c2a42c5c --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+
+npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk c0d7456527a3989101f3f0fe1c192a7f649e5ce0fb0cb3e35dad03fa963c5e56 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789 
+
+npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk 5fc66140b1e4e7eeda646e553cae0d8549b25fee64ee1bb43f4cb96ce85d67e6 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789  
 ```
 
-5. Once the CCIP message is finalized on the destination blockchain, you can query the MyNFTs balance of your account, using the `balance-of` task:
+Tx hash: [0x52e8de47a8e9bcbf083a58478b7dc4ad42e764c6eb644be0d3fc3de33d8a7d98](https://mumbai.polygonscan.com/tx/0x52e8de47a8e9bcbf083a58478b7dc4ad42e764c6eb644be0d3fc3de33d8a7d98)
 
-![ccip-explorer](./img/ccip-explorer.png)
+Tx hash: [0x9b2898f71d8371934d99f17af4a032a9e3dc7af3ba140647d10fc6d60fbf1c04](https://mumbai.polygonscan.com/tx/0x9b2898f71d8371934d99f17af4a032a9e3dc7af3ba140647d10fc6d60fbf1c04)
+
+Tx hash: [0x02124be758e9902fc37e9ce0cb823fb17c2ba3cdc41bae887806c79909fc61c1](https://sepolia.etherscan.io/tx/0x02124be758e9902fc37e9ce0cb823fb17c2ba3cdc41bae887806c79909fc61c1)
+
+Tx hash: [0x81a48afad3b33f43e70ae4ac51fbf8d5dd791cf609c9036c733de113f5e27268](https://sepolia.etherscan.io/tx/0x81a48afad3b33f43e70ae4ac51fbf8d5dd791cf609c9036c733de113f5e27268)
+
+
+#### Reveal selead bids
 
 ```shell
-npx hardhat balance-of
---my-nft <myNftContractAddress>
---blockchain <destinationBlockchain>
---owner <theAccountToCheckBalanceOf>
+npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB 
+
+npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk 341b403ddd84bd3ebc46d0ef9c4b0a89158bcbdb77a578a4cb0c0831c2a42c5c --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+
+npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk c0d7456527a3989101f3f0fe1c192a7f649e5ce0fb0cb3e35dad03fa963c5e56 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789   
+
+npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk 5fc66140b1e4e7eeda646e553cae0d8549b25fee64ee1bb43f4cb96ce85d67e6 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789    
 ```
 
-For example, to verify that the new MyNFT was minted, type:
+Tx hash: [0xdf342052cbfc42c65443564ec431148889836f1371972758f31632369a916c96](https://mumbai.polygonscan.com/tx/0xdf342052cbfc42c65443564ec431148889836f1371972758f31632369a916c96)
+
+Tx hash: [0xd7ab7ccc94cb1e67654559a234ac80123124299bc1b2c482cba03be4b6ef06bc](https://mumbai.polygonscan.com/tx/0xd7ab7ccc94cb1e67654559a234ac80123124299bc1b2c482cba03be4b6ef06bc)
+
+Tx hash: [0x5c07c6098313eb1c67214dbc9d40fe8f21ad5522cbd017d0fd48346e6877153a](https://sepolia.etherscan.io/tx/0x5c07c6098313eb1c67214dbc9d40fe8f21ad5522cbd017d0fd48346e6877153a)
+
+Tx hash: [0x3c7ad80909ab052ec23e7cd4a1f735e322906af716bbd7eb8e09b39725dad7fa](https://sepolia.etherscan.io/tx/0x3c7ad80909ab052ec23e7cd4a1f735e322906af716bbd7eb8e09b39725dad7fa)
+
+- Do you want to be sure that local winner is defined correctly? Me too! So lets do it:
 
 ```shell
-npx hardhat balance-of --my-nft <MY_NFT_CONTRACT_ADDRESS> --blockchain avalancheFuji --owner <PUT_YOUR_EOA_ADDRESS_HERE>
+npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14
+
+npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14
 ```
 
-Of course, you can see your newly minted NFT on popular NFT Marketplaces, like OpenSea for instance:
+The first expretion returns that the winner is 0x922eA37Ed75e180006424755C21Aa2a3FDFd4bEA with highest bid 3 for ethereumSepolia auction. The second one returns that the winner is 0x6d8d2E18c03364516abDE76915A5453A26fe8D53 with the highest bid 4 for polygonMumbai auction. Thats true)
 
-![opensea](./img/opensea.png)
 
-6. You can always withdraw tokens for Chainlink CCIP fees from the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) smart contract using the `withdraw` task. Note that the `--token-address` flag is optional. If not provided, native coins will be withdrawn.
+#### Reply phase
 
 ```shell
-npx hardhat withdraw
---beneficiary <withdrawTo>
---blockchain <sourceMinterBlockchain>
---from <sourceMinterAddress>
---token-address <tokensToWithdraw> # Optional, if left empty native coins will be withdrawn
+npx hardhat push-highest-bid-to-source --blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --value 0.75
 ```
 
-For example, to withdraw tokens previously sent for Chainlink CCIP fees, run:
+Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://mumbai.polygonscan.com/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
+
+CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
+
+
+#### Final phase
+
+- Let's notify destination auction about global state changes (for the future releases this stage will be modified and only 'loser' chains need to be notified):
 
 ```shell
-npx hardhat withdraw --beneficiary <BENEFICIARY_ADDRESS> --blockchain ethereumSepolia --from <SOURCE_MINTER_ADDRESS>
+npx hardhat push-highest-bid-to --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
 ```
 
-or
+Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://sepolia.etherscan.io/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
+
+CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
+
+
+- Let's finilaze the auction item state for source chain:
 
 ```shell
-npx hardhat withdraw --beneficiary <BENEFICIARY_ADDRESS> --blockchain ethereumSepolia --from <SOURCE_MINTER_ADDRESS> --token-address 0x779877A7B0D9E8603169DdbD7836e478b4624789
+npx hardhat finish --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
 ```
 
-depending on whether you filled the [`SourceMinter.sol`](./contracts/cross-chain-nft-minter/SourceMinter.sol) contract with `Native` or `LINK` in step number 3.
+Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://sepolia.etherscan.io/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
+
+CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
+
+
+- When NFT will be minted in destination chain we can finalize the auction item state for destination chain:
+
+```shell
+npx hardhat finish --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --value 0.0005
+```
+
+Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://mumbai.polygonscan.com/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
+
+CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
+
+
+- Lets check that buyer received his NFT and seller received tokens:
+
+```shell
+npx hardhat owner-of-nft --nft 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --blockchain polygonMumbai --token-id 14
+```
+
+And according to seller balance increased by 3 LINK (the value of second highest bid).
+
+
+### Ways of project development
+
+- increase cost efficacy,
+- increase reliance and fault tolerance,
+- implement the different auction strategies including Dutch auction,
+- simplification of the protocol.
+
+
+### Disclaimer
+
+These smart contracts are being provided as is. No guarantee, representation or warranty is being made, express or implied, as to the safety or correctness of the user interface or the smart contracts. They have not been audited and as such there can be no assurance they will work as intended, and users may experience delays, failures, errors, omissions or loss of transmitted information. THE SMART CONTRACTS CONTAINED HEREIN ARE FURNISHED AS IS, WHERE IS, WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF MERCHANTABILITY, NON- INFRINGEMENT OR FITNESS FOR ANY PARTICULAR PURPOSE. IT IS JUST A PROTOTYPE. DO NOT USE IT IN THE PRODUCTION.
+
+npx hardhat faucet --blockchain polygonMumbai --recipient 0x6d8d2E18c03364516abDE76915A5453A26fe8D53 --amount 1000000000000000

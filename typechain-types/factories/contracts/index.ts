@@ -2,6 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as utils from "./utils";
-export { DestinationMinter__factory } from "./DestinationMinter__factory";
-export { MyNFT__factory } from "./MyNFT__factory";
-export { SourceMinter__factory } from "./SourceMinter__factory";
+export { ChainRegistry__factory } from "./ChainRegistry__factory";
+export { CrossChainNFT__factory } from "./CrossChainNFT__factory";
+export { CrossChainSender__factory } from "./CrossChainSender__factory";
+export { CrossChainVickreyAuction__factory } from "./CrossChainVickreyAuction__factory";
+export { ICrossChainVickreyAuctionErrors__factory } from "./ICrossChainVickreyAuctionErrors__factory";

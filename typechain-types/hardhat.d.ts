@@ -58,13 +58,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LinkTokenInterface__factory>;
     getContractFactory(
-      name: "LinkTokenInterface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LinkTokenInterface__factory>;
-    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Metadata__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
       name: "ERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -94,21 +102,33 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
-      name: "DestinationMinter",
+      name: "ChainRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.DestinationMinter__factory>;
+    ): Promise<Contracts.ChainRegistry__factory>;
     getContractFactory(
-      name: "MyNFT",
+      name: "CrossChainNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.MyNFT__factory>;
+    ): Promise<Contracts.CrossChainNFT__factory>;
     getContractFactory(
-      name: "SourceMinter",
+      name: "CrossChainSender",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SourceMinter__factory>;
+    ): Promise<Contracts.CrossChainSender__factory>;
     getContractFactory(
-      name: "Withdraw",
+      name: "CrossChainVickreyAuction",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Withdraw__factory>;
+    ): Promise<Contracts.CrossChainVickreyAuction__factory>;
+    getContractFactory(
+      name: "ICrossChainVickreyAuctionErrors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICrossChainVickreyAuctionErrors__factory>;
+    getContractFactory(
+      name: "TestRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestRouter__factory>;
+    getContractFactory(
+      name: "TestToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestToken__factory>;
 
     getContractAt(
       name: "CCIPReceiver",
@@ -166,15 +186,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.LinkTokenInterface>;
     getContractAt(
-      name: "LinkTokenInterface",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LinkTokenInterface>;
-    getContractAt(
       name: "Ownable",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
+    getContractAt(
+      name: "ERC20",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20>;
+    getContractAt(
+      name: "IERC20Metadata",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Metadata>;
+    getContractAt(
+      name: "IERC20",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
     getContractAt(
       name: "ERC721",
       address: string | ethers.Addressable,
@@ -211,25 +241,40 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
     getContractAt(
-      name: "DestinationMinter",
+      name: "ChainRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.DestinationMinter>;
+    ): Promise<Contracts.ChainRegistry>;
     getContractAt(
-      name: "MyNFT",
+      name: "CrossChainNFT",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.MyNFT>;
+    ): Promise<Contracts.CrossChainNFT>;
     getContractAt(
-      name: "SourceMinter",
+      name: "CrossChainSender",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.SourceMinter>;
+    ): Promise<Contracts.CrossChainSender>;
     getContractAt(
-      name: "Withdraw",
+      name: "CrossChainVickreyAuction",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.Withdraw>;
+    ): Promise<Contracts.CrossChainVickreyAuction>;
+    getContractAt(
+      name: "ICrossChainVickreyAuctionErrors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICrossChainVickreyAuctionErrors>;
+    getContractAt(
+      name: "TestRouter",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestRouter>;
+    getContractAt(
+      name: "TestToken",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestToken>;
 
     deployContract(
       name: "CCIPReceiver",
@@ -276,13 +321,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LinkTokenInterface>;
     deployContract(
-      name: "LinkTokenInterface",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.LinkTokenInterface>;
-    deployContract(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
+    deployContract(
+      name: "ERC20",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC20>;
+    deployContract(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Metadata>;
+    deployContract(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "ERC721",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -312,21 +365,33 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165>;
     deployContract(
-      name: "DestinationMinter",
+      name: "ChainRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.DestinationMinter>;
+    ): Promise<Contracts.ChainRegistry>;
     deployContract(
-      name: "MyNFT",
+      name: "CrossChainNFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MyNFT>;
+    ): Promise<Contracts.CrossChainNFT>;
     deployContract(
-      name: "SourceMinter",
+      name: "CrossChainSender",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SourceMinter>;
+    ): Promise<Contracts.CrossChainSender>;
     deployContract(
-      name: "Withdraw",
+      name: "CrossChainVickreyAuction",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Withdraw>;
+    ): Promise<Contracts.CrossChainVickreyAuction>;
+    deployContract(
+      name: "ICrossChainVickreyAuctionErrors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ICrossChainVickreyAuctionErrors>;
+    deployContract(
+      name: "TestRouter",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestRouter>;
+    deployContract(
+      name: "TestToken",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestToken>;
 
     deployContract(
       name: "CCIPReceiver",
@@ -384,15 +449,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.LinkTokenInterface>;
     deployContract(
-      name: "LinkTokenInterface",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.LinkTokenInterface>;
-    deployContract(
       name: "Ownable",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
+    deployContract(
+      name: "ERC20",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC20>;
+    deployContract(
+      name: "IERC20Metadata",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Metadata>;
+    deployContract(
+      name: "IERC20",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "ERC721",
       args: any[],
@@ -429,25 +504,40 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165>;
     deployContract(
-      name: "DestinationMinter",
+      name: "ChainRegistry",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.DestinationMinter>;
+    ): Promise<Contracts.ChainRegistry>;
     deployContract(
-      name: "MyNFT",
+      name: "CrossChainNFT",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MyNFT>;
+    ): Promise<Contracts.CrossChainNFT>;
     deployContract(
-      name: "SourceMinter",
+      name: "CrossChainSender",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SourceMinter>;
+    ): Promise<Contracts.CrossChainSender>;
     deployContract(
-      name: "Withdraw",
+      name: "CrossChainVickreyAuction",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Withdraw>;
+    ): Promise<Contracts.CrossChainVickreyAuction>;
+    deployContract(
+      name: "ICrossChainVickreyAuctionErrors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ICrossChainVickreyAuctionErrors>;
+    deployContract(
+      name: "TestRouter",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestRouter>;
+    deployContract(
+      name: "TestToken",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TestToken>;
 
     // default types
     getContractFactory(
