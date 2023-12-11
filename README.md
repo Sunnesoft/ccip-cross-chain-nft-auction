@@ -199,7 +199,7 @@ Example of output:
 
 ```
 Attempting to deploy CrossChainVickreyAuction smart contract on the ethereumSepolia blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address, with the Router address 0xd0daae2231e9cb96b94c8512223533293c3693bf provided as constructor argument
-CrossChainVickreyAuction contract deployed at address 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 on the ethereumSepolia blockchain
+CrossChainVickreyAuction contract deployed at address 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 on the ethereumSepolia blockchain
 ```
 
 - Let's deploy auction and nft contracs to polygonMumbai:
@@ -212,20 +212,20 @@ Example of output:
 
 ```
 Attempting to deploy CrossChainVickreyAuction smart contract on the polygonMumbai blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address, with the Router address 0x70499c328e1e2a3c41108bd3730f6670a44595d1 provided as constructor argument
-CrossChainVickreyAuction contract deployed at address 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f on the polygonMumbai blockchain
+CrossChainVickreyAuction contract deployed at address 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 on the polygonMumbai blockchain
 Attempting to deploy CrossChainNFT smart contract on the polygonMumbai blockchain using 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 address
-CrossChainNFT contract deployed at address 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 on the polygonMumbai blockchain
+CrossChainNFT contract deployed at address 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b on the polygonMumbai blockchain
 Attempting to grant the minter role to the CrossChainVickreyAuction smart contract
-CrossChainVickreyAuction can now mint CrossChainNFTs. Transaction hash: 0x461b56f6d6c7b8c721b2479a8290ca7c7125f3292ea6c723630827819deef020
+CrossChainVickreyAuction can now mint CrossChainNFTs. Transaction hash: 0xcf569140000aa9eccce29fd9736d80e07b47382bb5fd6c34c100cefd6238d1dc
 ```
 
 - We need to set permissions list of allowed chains for every auction contracts:
 
 
 ```shell
-npx hardhat set-allowed-chain --source-blockchain polygonMumbai --destination-blockchain ethereumSepolia --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --receiver 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8
+npx hardhat set-allowed-chain --source-blockchain polygonMumbai --destination-blockchain ethereumSepolia --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --receiver 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5
 
-npx hardhat set-allowed-chain --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --receiver 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f
+npx hardhat set-allowed-chain --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --receiver 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46
 ```
 
 #### Auction creation
@@ -233,56 +233,56 @@ npx hardhat set-allowed-chain --source-blockchain ethereumSepolia --destination-
 - Seller address is 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a. Lets mint new NFT token for him: 
 
 ```shell
-npx hardhat mint-nft-source --source-blockchain ethereumSepolia --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --token-uri https://example.com/4 --address 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a
+npx hardhat mint-nft-source --source-blockchain ethereumSepolia --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --token-uri https://example.com/4 --address 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a
 ```
 
-Tx hash: [0xe00c6c3b995dc252ecc5a858818fb03a9cb4cb1b876d80aa736f20357d748151](https://sepolia.etherscan.io/tx/0xe00c6c3b995dc252ecc5a858818fb03a9cb4cb1b876d80aa736f20357d748151)
+Tx hash: [0xbdbf84f805bce815510a48a6599051313fae2607f28d9955a675c1f5c608e49a](https://sepolia.etherscan.io/tx/0xbdbf84f805bce815510a48a6599051313fae2607f28d9955a675c1f5c608e49a)
 
 
 - Now we are ready to create auction in the source chain:
 
 ```shell
-npx hardhat create-auction-source --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --start-time 0 --bid-period 600 --reveal-period 600 --reply-period 600 --collateral 1 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e
+npx hardhat create-auction-source --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --start-time 0 --bid-period 1200 --reveal-period 1200 --reply-period 1200 --collateral 1 --pk HERE_IS_PRIVATE_KEY
 ```
 
-Tx hash: 0xc1fb42e9a3874cfd5cb50b4f6b83c8b40b21dc01db5cf5c528ef7976f3470bcd(https://sepolia.etherscan.io/tx/0xc1fb42e9a3874cfd5cb50b4f6b83c8b40b21dc01db5cf5c528ef7976f3470bcd)
+Tx hash: 0x5c1585f444a001de9337e9badbbcad9021b1c7a1f9d8654a14db0ed3366f93ea(https://sepolia.etherscan.io/tx/0x5c1585f444a001de9337e9badbbcad9021b1c7a1f9d8654a14db0ed3366f93ea)
 
 
 - Let's create the aucion on polygonMumbai network:
 
 ```shell
-npx hardhat create-auction-destination --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --source-nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --destination-nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
+npx hardhat create-auction-destination --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --source-nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --destination-nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --pk HERE_IS_PRIVATE_KEY --value 0.0005
 ```
 
-Tx hash: [0x37c054ef9234d2f3a8d77190f1e30dcf22539d83f1ce353cf178454b286fce10](https://sepolia.etherscan.io/tx/0x37c054ef9234d2f3a8d77190f1e30dcf22539d83f1ce353cf178454b286fce10)
+Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://sepolia.etherscan.io/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
 
-CCIP Message ID: [0x2892cbc2a5d3cbaa04bb955f6f1c9cc09e83966eb80857d1cf35327194936218](https://ccip.chain.link/msg/0x2892cbc2a5d3cbaa04bb955f6f1c9cc09e83966eb80857d1cf35327194936218)
+CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
 
 
 - Let's get information about auction from ethereumSepolia chain:
 
 ```shell
-npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14
+npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4
 ```
 
 Example of output:
 
 ```
 Attempting to call the getAuctionInfo function of the CrossChainVickreyAuction.sol smart contract on the ethereumSepolia from 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 account
-getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702264908,1702265508,1702266108,1702266708,0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654,1,0,0,0x0000000000000000000000000000000000000000,0
+getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702257840,1702259040,1702260240,1702261440,0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654,1,0,0,0x0000000000000000000000000000000000000000,0
 ```
 
 - Let's get information about auction from polygonMumbai chain:
 
 ```shell
-npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14
+npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4
 ```
 
 Example of output:
 
 ```
 Attempting to call the getAuctionInfo function of the CrossChainVickreyAuction.sol smart contract on the polygonMumbai from 0x8d6D925eDF2C84E99Ffa7F279865c75FCD858809 account
-getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702257840,1702259040,1702260240,1702261440,0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2,1,0,0,0x0000000000000000000000000000000000000000,0
+getAuctionInfo request sent, response: 0x3c7aB2bcC615cf98f75AF6b446D35bE1A404754a,16015286601757825753,1702257840,1702259040,1702260240,1702261440,0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b,1,0,0,0x0000000000000000000000000000000000000000,0
 ```
 
 #### Bidding
@@ -323,13 +323,13 @@ Tx hash: [0xd12ad978a1e6888236ae1e03876f844f3595232a897e075e5c75968ba270b225](ht
 - Let's make the first bids
 
 ```shell
-npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk HERE_IS_PRIVATE_KEY --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 
-npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk 341b403ddd84bd3ebc46d0ef9c4b0a89158bcbdb77a578a4cb0c0831c2a42c5c --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+npx hardhat bid --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk HERE_IS_PRIVATE_KEY --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 
-npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk c0d7456527a3989101f3f0fe1c192a7f649e5ce0fb0cb3e35dad03fa963c5e56 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789 
+npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk HERE_IS_PRIVATE_KEY --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789 
 
-npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk 5fc66140b1e4e7eeda646e553cae0d8549b25fee64ee1bb43f4cb96ce85d67e6 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789  
+npx hardhat bid --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk HERE_IS_PRIVATE_KEY --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789  
 ```
 
 Tx hash: [0x52e8de47a8e9bcbf083a58478b7dc4ad42e764c6eb644be0d3fc3de33d8a7d98](https://mumbai.polygonscan.com/tx/0x52e8de47a8e9bcbf083a58478b7dc4ad42e764c6eb644be0d3fc3de33d8a7d98)
@@ -344,13 +344,13 @@ Tx hash: [0x81a48afad3b33f43e70ae4ac51fbf8d5dd791cf609c9036c733de113f5e27268](ht
 #### Reveal selead bids
 
 ```shell
-npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB 
+npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000001 --pk HERE_IS_PRIVATE_KEY --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB 
 
-npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk 341b403ddd84bd3ebc46d0ef9c4b0a89158bcbdb77a578a4cb0c0831c2a42c5c --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+npx hardhat reveal --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --bid-value 4 --nonce 0x0000000000000000000000000000000000000000000000000000000000000005 --pk HERE_IS_PRIVATE_KEY --token-contract 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 
-npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk c0d7456527a3989101f3f0fe1c192a7f649e5ce0fb0cb3e35dad03fa963c5e56 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789   
+npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --bid-value 2 --nonce 0x0000000000000000000000000000000000000000000000000000000000000003 --pk HERE_IS_PRIVATE_KEY --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789   
 
-npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk 5fc66140b1e4e7eeda646e553cae0d8549b25fee64ee1bb43f4cb96ce85d67e6 --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789    
+npx hardhat reveal --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --bid-value 3 --nonce 0x0000000000000000000000000000000000000000000000000000000000000008 --pk HERE_IS_PRIVATE_KEY --token-contract 0x779877A7B0D9E8603169DdbD7836e478b4624789    
 ```
 
 Tx hash: [0xdf342052cbfc42c65443564ec431148889836f1371972758f31632369a916c96](https://mumbai.polygonscan.com/tx/0xdf342052cbfc42c65443564ec431148889836f1371972758f31632369a916c96)
@@ -364,9 +364,9 @@ Tx hash: [0x3c7ad80909ab052ec23e7cd4a1f735e322906af716bbd7eb8e09b39725dad7fa](ht
 - Do you want to be sure that local winner is defined correctly? Me too! So lets do it:
 
 ```shell
-npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14
+npx hardhat get-auction-info --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4
 
-npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14
+npx hardhat get-auction-info --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4
 ```
 
 The first expretion returns that the winner is 0x922eA37Ed75e180006424755C21Aa2a3FDFd4bEA with highest bid 3 for ethereumSepolia auction. The second one returns that the winner is 0x6d8d2E18c03364516abDE76915A5453A26fe8D53 with the highest bid 4 for polygonMumbai auction. Thats true)
@@ -375,12 +375,8 @@ The first expretion returns that the winner is 0x922eA37Ed75e180006424755C21Aa2a
 #### Reply phase
 
 ```shell
-npx hardhat push-highest-bid-to-source --blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --value 0.75
+npx hardhat push-highest-bid-to-source --blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --pk HERE_IS_PRIVATE_KEY --value 0.0005
 ```
-
-Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://mumbai.polygonscan.com/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
-
-CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
 
 
 #### Final phase
@@ -388,40 +384,28 @@ CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9
 - Let's notify destination auction about global state changes (for the future releases this stage will be modified and only 'loser' chains need to be notified):
 
 ```shell
-npx hardhat push-highest-bid-to --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
+npx hardhat push-highest-bid-to --source-blockchain ethereumSepolia --destination-blockchain polygonMumbai --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --pk HERE_IS_PRIVATE_KEY --value 0.0005
 ```
-
-Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://sepolia.etherscan.io/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
-
-CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
 
 
 - Let's finilaze the auction item state for source chain:
 
 ```shell
-npx hardhat finish --source-blockchain ethereumSepolia --auction-contract 0x4160b6c9C995966d537434b11a05F6A8Bdd4d6D8 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 14 --pk 9e4796256e320b4334bf46ec8ccab3b1178aa7d093e90d7d3ac678be2c98d51e --value 0.0005
+npx hardhat finish --source-blockchain ethereumSepolia --auction-contract 0x21B93cf747643CCCfB505905a4cD7672eEE0dFB5 --nft-token-contract 0x2cC1FB8e4bcE424838a3Ec6B5993A6ecc7EE7654 --token-id 4 --pk HERE_IS_PRIVATE_KEY --value 0.0005
 ```
-
-Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://sepolia.etherscan.io/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
-
-CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
 
 
 - When NFT will be minted in destination chain we can finalize the auction item state for destination chain:
 
 ```shell
-npx hardhat finish --source-blockchain polygonMumbai --auction-contract 0xf569d4B9f4406B39337C6373bB489d3Ee65eBD3f --nft-token-contract 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --token-id 14 --pk dc683e83a497fa1b4e5c6ecc283992d4f7ddd9687b8e1a88e6761d69fa2d016e --value 0.0005
+npx hardhat finish --source-blockchain polygonMumbai --auction-contract 0x0e99dCb7e3Bc6ECcee3168D10046ECBf8cB77b46 --nft-token-contract 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --token-id 4 --pk HERE_IS_PRIVATE_KEY --value 0.0005
 ```
-
-Tx hash: [0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff](https://mumbai.polygonscan.com/tx/0xc3aab0d4c17f7076c05c8cb9e7a5e587002def2bccbebfd7bdc6fd7a4595a7ff)
-
-CCIP Message ID: [0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca](https://ccip.chain.link/msg/0x79b2a358db56dbfc083a1e5eef67b5230dc804cf2df8556a5ccca9fbdab9f8ca)
 
 
 - Lets check that buyer received his NFT and seller received tokens:
 
 ```shell
-npx hardhat owner-of-nft --nft 0x060C13c92FfC89866A1B78C2015a5cd1AbadA2c2 --blockchain polygonMumbai --token-id 14
+npx hardhat owner-of-nft --nft 0x0B5f1479F08f6C1C2355879EA52c622a8b1Fc84b --blockchain polygonMumbai --token-id 4
 ```
 
 And according to seller balance increased by 3 LINK (the value of second highest bid).
@@ -439,4 +423,3 @@ And according to seller balance increased by 3 LINK (the value of second highest
 
 These smart contracts are being provided as is. No guarantee, representation or warranty is being made, express or implied, as to the safety or correctness of the user interface or the smart contracts. They have not been audited and as such there can be no assurance they will work as intended, and users may experience delays, failures, errors, omissions or loss of transmitted information. THE SMART CONTRACTS CONTAINED HEREIN ARE FURNISHED AS IS, WHERE IS, WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF MERCHANTABILITY, NON- INFRINGEMENT OR FITNESS FOR ANY PARTICULAR PURPOSE. IT IS JUST A PROTOTYPE. DO NOT USE IT IN THE PRODUCTION.
 
-npx hardhat faucet --blockchain polygonMumbai --recipient 0x6d8d2E18c03364516abDE76915A5453A26fe8D53 --amount 1000000000000000
