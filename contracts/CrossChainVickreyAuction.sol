@@ -120,8 +120,8 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
 
     uint64 immutable chainSelector;
 
-    constructor(address router_, address token_, uint64 chain, uint256 gasLimit_, bool strict_) 
-        CrossChainSender(router_, token_, gasLimit_, strict_)
+    constructor(address router_, address token_, uint64 chain, uint256 gasLimit_, bool strict_, address feeToken_) 
+        CrossChainSender(router_, token_, gasLimit_, strict_, feeToken_)
         CCIPReceiver(router_)
     {
         chainSelector = chain;
@@ -140,17 +140,17 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
         nonReentrant
     {
         if (startTime == 0) {
-            startTime = uint32(block.timestamp) + 10 minutes;
-        } else if (startTime < block.timestamp + 10 minutes) {
+            startTime = uint32(block.timestamp) + 1 hours;
+        } else if (startTime < block.timestamp + 1 hours) {
             revert InvalidStartTimeError(startTime, block.timestamp);
         }
-        if (bidPeriod < 10 minutes) {
+        if (bidPeriod < 1 hours) {
             revert BidPeriodTooShortError(bidPeriod);
         }
-        if (revealPeriod < 10 minutes) {
+        if (revealPeriod < 1 hours) {
             revert RevealPeriodTooShortError(revealPeriod);
         }
-        if (replyPeriod < 10 minutes) {
+        if (replyPeriod < 1 hours) {
             revert ReplyPeriodTooShortError(replyPeriod);
         }
 
@@ -217,7 +217,7 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
                 auctionInfo.endOfReplyPeriod, 
                 destinationTokenContract, 
                 auctionInfo.collateral)
-        )), destinationChainSelector, msg.value);
+        )), destinationChainSelector, msg.sender);
 
         rival.startTime = auctionInfo.startTime;
         rival.tokenContract = destinationTokenContract;
@@ -351,10 +351,6 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
             revert AuctionIsNotFinishedError();
         }
 
-        if (auction.numReplyedChains != 0) {
-            revert CounterOfUnrepliedChainsMustBeZeroError();
-        }
-
         address highestBidder = auctionInfo.highestBidder;
         if (highestBidder == address(0)) {
             if (chainSelector == auctionInfo.chainSelector) {
@@ -364,13 +360,18 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
             auction.isInit = false;
         } else {
             uint256 secondHighestBid = auctionInfo.secondHighestBid;
+            uint64 destinationChainSelector = auctionInfo.highestBidderChainSelector;
 
             if (secondHighestBid < auctionInfo.collateral) {
                 secondHighestBid = auctionInfo.highestBid;
             }
 
             if (chainSelector == auctionInfo.chainSelector) {
-                if (auctionInfo.highestBidderChainSelector == chainSelector) {
+                if (destinationChainSelector == chainSelector) {
+                    if (auction.numReplyedChains != 0) {
+                        revert CounterOfUnrepliedChainsMustBeZeroError();
+                    }
+
                     ERC721URIStorage(tokenContract).safeTransferFrom(address(this), highestBidder, tokenId);
 
                     Bid storage bid_ = auction.bids[highestBidder];
@@ -384,7 +385,10 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
 
                     auction.isInit = false;
                 } else {
-                    uint64 destinationChainSelector = auctionInfo.highestBidderChainSelector;
+                    if (auction.numReplyedChains > 1) {
+                        revert CounterOfUnrepliedChainsMustBeZeroError();
+                    }
+
                     CrossChainAuctionRival storage rival = auction.rivals[destinationChainSelector]; 
                     if (rival.startTime != auctionInfo.startTime) {
                         revert NotAllowedError();
@@ -395,10 +399,10 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
                         tokenId,
                         auctionInfo.startTime,
                         ERC721URIStorage(tokenContract).tokenURI(tokenId)
-                    )), destinationChainSelector, msg.value);
+                    )), destinationChainSelector, msg.sender);
                 }
             } else {
-                if (auctionInfo.highestBidderChainSelector == chainSelector) {
+                if (destinationChainSelector == chainSelector) {
                     CrossChainAuctionRival storage rival = auction.rivals[auctionInfo.chainSelector]; 
                     if (rival.startTime != auctionInfo.startTime) {
                         revert NotAllowedError();
@@ -414,10 +418,10 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
                         rival.tokenContract, 
                         tokenId,
                         auctionInfo.startTime
-                    )), secondHighestBid, auctionInfo.chainSelector, msg.value);
+                    )), secondHighestBid, auctionInfo.chainSelector, msg.sender);
 
                     if (collateral > secondHighestBid) {
-                        SafeERC20.safeTransfer(IERC20(token), highestBidder, collateral - secondHighestBid);
+                        SafeERC20.safeTransferFrom(IERC20(token), address(this), highestBidder, collateral - secondHighestBid);
                     }
 
                     auction.isInit = false;
@@ -469,7 +473,7 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
             auctionInfo.highestBid,
             auctionInfo.secondHighestBid,
             auctionInfo.highestBidder
-        )), destinationChainSelector, msg.value);
+        )), destinationChainSelector, msg.sender);
     }
 
     function pushHighestBidTo(
@@ -506,7 +510,7 @@ contract CrossChainVickreyAuction is ReentrancyGuard, ICrossChainVickreyAuctionE
             auctionInfo.startTime,
             auctionInfo.highestBidder,
             auctionInfo.highestBidderChainSelector
-        )), destinationChainSelector, msg.value);
+        )), destinationChainSelector, msg.sender);
 
         auction.numReplyedChains--;
         rival.revealed = false;

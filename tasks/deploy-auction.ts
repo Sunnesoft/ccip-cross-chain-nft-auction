@@ -6,6 +6,7 @@ import { getProviderRpcUrl, getRouterConfig, getPrivateKey } from "./utils";
 import { Wallet, ethers } from "ethers";
 import { CrossChainVickreyAuction, CrossChainNFT, CrossChainNFT__factory } from "../typechain-types";
 import { Spinner } from "../utils/spinner";
+import { LINK_ADDRESSES } from "./constants";
 
 task(`deploy-auction`, `Deploys CrossChainNFT.sol and CrossChainVickreyAuction.sol smart contracts`)
     .addOptionalParam(`router`, `The address of the Router contract on the destination blockchain`)
@@ -19,6 +20,7 @@ task(`deploy-auction`, `Deploys CrossChainNFT.sol and CrossChainVickreyAuction.s
     .setAction(async (taskArguments: TaskArguments, hre: HardhatRuntimeEnvironment) => {
         const routerAddress = taskArguments.router ? taskArguments.router : getRouterConfig(hre.network.name).address;
         const tokenAddress = taskArguments.tokenAddress;
+        const linkToken = LINK_ADDRESSES[hre.network.name];
         const gasLimit = taskArguments.gasLimit;
         const strict = taskArguments.strict;
         const sourceChainName = taskArguments.sourceChainName;
@@ -38,7 +40,7 @@ task(`deploy-auction`, `Deploys CrossChainNFT.sol and CrossChainVickreyAuction.s
         console.log(`Attempting to deploy CrossChainVickreyAuction smart contract on the ${hre.network.name} blockchain using ${deployer.address} address, with the Router address ${routerAddress} provided as constructor argument`);
         spinner.start();
 
-        const destinationAuction: CrossChainVickreyAuction = await hre.ethers.deployContract("CrossChainVickreyAuction", [routerAddress, tokenAddress, chainSelector, gasLimit, strict]);
+        const destinationAuction: CrossChainVickreyAuction = await hre.ethers.deployContract("CrossChainVickreyAuction", [routerAddress, tokenAddress, chainSelector, gasLimit, strict, linkToken]);
         await destinationAuction.waitForDeployment();
 
         spinner.stop();

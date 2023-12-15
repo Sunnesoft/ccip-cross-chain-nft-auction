@@ -50,7 +50,7 @@ describe("CrossChainVickreyAuction in source chain", function () {
     linkTokenAddress = await linkToken.getAddress();
     sourceAuction = await ethers.deployContract(
       "CrossChainVickreyAuction", 
-      [owner.address, linkTokenAddress, souceChainSelector, gasLimit, strictMode]);
+      [owner.address, linkTokenAddress, souceChainSelector, gasLimit, strictMode, linkTokenAddress]);
     await sourceAuction.waitForDeployment();
     sourceAuction = sourceAuction.connect(owner);
 

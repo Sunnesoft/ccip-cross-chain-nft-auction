@@ -3,9 +3,10 @@ import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 import { getRouterConfig, getProviderRpcUrl } from "./utils";
 import { Wallet, ethers, CallExceptionError, BytesLike } from "ethers";
-import { CrossChainVickreyAuction, CrossChainVickreyAuction__factory } from "../typechain-types";
+import { CrossChainVickreyAuction, CrossChainVickreyAuction__factory, ERC20__factory, ERC20 } from "../typechain-types";
 import { Spinner } from "../utils/spinner";
 import { getCcipMessageId } from "./helpers";
+import { LINK_ADDRESSES } from "./constants";
 
 task(`push-highest-bid-to`, `Send auction highest bid to destination chain`)
     .addParam(`sourceBlockchain`, `The name of the blockchain from which you send message (for example ethereumSepolia)`)
@@ -27,12 +28,20 @@ task(`push-highest-bid-to`, `Send auction highest bid to destination chain`)
         const spinner: Spinner = new Spinner();
 
         const auction: CrossChainVickreyAuction = CrossChainVickreyAuction__factory.connect(auctionContract, signer);
+        const linkTokenAddress = LINK_ADDRESSES[sourceBlockchain];
+        const linkToken: ERC20 = ERC20__factory.connect(linkTokenAddress, signer);
 
         try {
+            console.log(`Attempting to approve ERC0 tokens (${linkTokenAddress}) for the ${auctionContract} account`);
+            spinner.start();
+            const txApprove = await linkToken.approve(auctionContract, ethers.parseEther(value));
+            await txApprove.wait();
+            spinner.stop();
+            console.log(`Approve is done, transaction hash: ${txApprove.hash}`);
+
             console.log(`Attempting to call the pushHighestBidTo function of the CrossChainVickreyAuction.sol smart contract on the ${sourceBlockchain} from ${signer.address} account`);
             spinner.start();
-            const options = {value: ethers.parseEther(value)};
-            const tx = await auction.pushHighestBidTo(nftTokenContract, tokenId, chainSelector, options);
+            const tx = await auction.pushHighestBidTo(nftTokenContract, tokenId, chainSelector);
             const receipt = await tx.wait();
             spinner.stop();
             console.log(`pushHighestBidTo request sent, transaction hash: ${tx.hash}`);

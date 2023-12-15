@@ -3,9 +3,10 @@ import { task } from "hardhat/config";
 import { TaskArguments } from "hardhat/types";
 import { getProviderRpcUrl, getRouterConfig } from "./utils";
 import { Wallet, ethers, CallExceptionError, BytesLike } from "ethers";
-import { CrossChainVickreyAuction, CrossChainVickreyAuction__factory } from "../typechain-types";
+import { CrossChainVickreyAuction, CrossChainVickreyAuction__factory, ERC20__factory, ERC20 } from "../typechain-types";
 import { Spinner } from "../utils/spinner";
 import { getCcipMessageId } from "./helpers";
+import { LINK_ADDRESSES } from "./constants";
 
 task(`create-auction-destination`, `Creates the new CrossChainVickreyAuction in destination network`)
     .addParam(`sourceBlockchain`, `The name of the source blockchain (for example ethereumSepolia)`)
@@ -28,18 +29,26 @@ task(`create-auction-destination`, `Creates the new CrossChainVickreyAuction in 
 
         const spinner: Spinner = new Spinner();
 
+        const linkTokenAddress = LINK_ADDRESSES[sourceBlockchain];
+        const linkToken: ERC20 = ERC20__factory.connect(linkTokenAddress, signer);
+
         const auction: CrossChainVickreyAuction = CrossChainVickreyAuction__factory.connect(auctionContract, signer);
 
         try {
+            console.log(`Attempting to approve ERC0 tokens (${linkTokenAddress}) for the ${auctionContract} account`);
+            spinner.start();
+            const txApprove = await linkToken.approve(auctionContract, ethers.parseEther(value));
+            await txApprove.wait();
+            spinner.stop();
+            console.log(`Approve is done, transaction hash: ${txApprove.hash}`);
+
             console.log(`Attempting to call the create function of the CrossChainVickreyAuction.sol smart contract on the ${sourceBlockchain} from ${signer.address} account`);
             spinner.start();
-            const options = {value: ethers.parseEther(value)};
             const tx = await auction["create(address,address,uint256,uint64)"](
                 sourceNftTokenContract,
                 destinationNftTokenContract,
                 tokenId,
-                chainSelector,
-                options
+                chainSelector
             );
             const receipt = await tx.wait();
             spinner.stop();

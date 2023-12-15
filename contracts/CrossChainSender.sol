@@ -5,6 +5,7 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {ChainRegistry} from "./ChainRegistry.sol";
 
@@ -13,6 +14,7 @@ contract CrossChainSender is ChainRegistry {
     address immutable token;
     bool immutable strict;
     uint256 immutable gasLimit;
+    address immutable feeToken;
 
     error InvalidValueForFeeError(uint256 value, uint256 fee);
     error UnknownSourceError();
@@ -31,19 +33,21 @@ contract CrossChainSender is ChainRegistry {
         bytes data;
     }
 
-    constructor(address router_, address token_, uint256 gasLimit_, bool strict_) 
+    constructor(address router_, address token_, uint256 gasLimit_, bool strict_, address feeToken_) 
     {
         router = router_;
         token = token_;
         strict = strict_;
         gasLimit = gasLimit_;
+        feeToken = feeToken_;
+        IERC20(feeToken).approve(router_, type(uint256).max);
     }
 
     function _sendMessageAndTokens(
         CCMessage memory data,
         uint256 tokenAmount,
         uint64 destinationChainSelector,
-        uint256 value
+        address sender
     ) 
         internal
         returns (bytes32 messageId)
@@ -68,16 +72,16 @@ contract CrossChainSender is ChainRegistry {
                     strict: strict
                 })
             ),
-            feeToken: address(0)
+            feeToken: feeToken
         });
 
-        return _sendRawMessage(message, destinationChainSelector, value);
+        return _sendRawMessage(message, destinationChainSelector, sender);
     }
 
     function _sendMessage(
         CCMessage memory data,
         uint64 destinationChainSelector,
-        uint256 value
+        address sender
     ) 
         internal
         returns (bytes32 messageId)
@@ -94,16 +98,16 @@ contract CrossChainSender is ChainRegistry {
                     strict: strict
                 })
             ),
-            feeToken: address(0)
+            feeToken: feeToken
         });
 
-        return _sendRawMessage(message, destinationChainSelector, value);
+        return _sendRawMessage(message, destinationChainSelector, sender);
     }
 
     function _sendRawMessage(
         Client.EVM2AnyMessage memory message,
         uint64 destinationChainSelector,
-        uint256 value
+        address sender
     ) 
         internal
         returns (bytes32 messageId)
@@ -113,10 +117,9 @@ contract CrossChainSender is ChainRegistry {
             message
         );
 
-        if (value < fee) {
-            revert InvalidValueForFeeError(value, fee);
-        }
-        messageId = IRouterClient(router).ccipSend{value: fee}(
+        SafeERC20.safeTransferFrom(IERC20(feeToken), sender, address(this), fee);
+
+        messageId = IRouterClient(router).ccipSend(
             destinationChainSelector,
             message
         );
